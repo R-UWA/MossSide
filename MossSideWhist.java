@@ -45,7 +45,7 @@ public class MossSideWhist{
    * @param p3 the class of the third agent
    * */
   public MossSideWhist(MSWAgent p1, MSWAgent p2, MSWAgent p3){
-    this(p1, p1.sayName(), p2, p2.sayName(), p3, p3.sayNAme());
+    this(p1, p1.sayName(), p2, p2.sayName(), p3, p3.sayName());
   }
 
   /**
@@ -55,7 +55,7 @@ public class MossSideWhist{
    * @param rotations, the number of full rotations (i.e. it plays 3*rotations rounds of MossSideWhist)
    * @param report, a printstream to display to game state.
    **/
-  public void playGame(int rotations, PrintStream report){
+  public void playGame(int rounds, PrintStream report){
     this.report = report;
     for(int i = 0; i<3*rounds; i++){
       playHand();
@@ -78,9 +78,11 @@ public class MossSideWhist{
       if(i>discard.length || !hands.get(leader).remove(discard[i]))
         hands.get(leader).remove(0);//if illegitimate discards, the 0 card is discarded.
         //could include a score penalty here as well.
+        display(leader);
     }
     String first = leader;
     for(int i = 0; i<16; i++){
+  display(leader); display(left); display(right);  
       first = trick(first);
       scoreboard.put(first, scoreboard.get(first)+1);
     }
@@ -107,16 +109,16 @@ public class MossSideWhist{
     for(int i = 0; i<4; i++)
       hands.get(leader).add(deck.remove(rand.nextInt(deck.size())));
     for(int i = 0; i<16; i++){
-      hands.get(leader).add(deck.remove(rand.nextInt(deck.size())));
       hands.get(left).add(deck.remove(rand.nextInt(deck.size())));
       hands.get(right).add(deck.remove(rand.nextInt(deck.size())));
+      hands.get(leader).add(deck.remove(rand.nextInt(deck.size())));
     }
     Collections.sort(hands.get(leader));
     Collections.sort(hands.get(left));
     Collections.sort(hands.get(right));
-    agents.get(leader).seeHand(hands.get(leader), MSWAgent.LEADER);
-    agents.get(left).seeHand(hands.get(left), MSWAgent.LEFT);
-    agents.get(right).seeHand(hands.get(right), MSWAgent.RIGHT);
+    agents.get(leader).seeHand((ArrayList<Card>)hands.get(leader).clone(), MSWAgent.LEADER);
+    agents.get(left).seeHand((ArrayList<Card>)hands.get(left).clone(), MSWAgent.LEFT);
+    agents.get(right).seeHand((ArrayList<Card>)hands.get(right).clone(), MSWAgent.RIGHT);
   }
 
   /**
@@ -155,7 +157,7 @@ public class MossSideWhist{
       last = hand.get(rand.nextInt(hand.size()));
     hand.remove(last);
     showCards(last, third);
-  report.println(next);  
+  report.println(last);  
     String winner = getWinner(lead, next, last, first, second, third);
     agents.get(leader).seeResult(winner);
     agents.get(left).seeResult(winner);
@@ -236,6 +238,8 @@ public class MossSideWhist{
   }
 
   public static void main(String[] args){
+    MossSideWhist game = new MossSideWhist(new RandomAgent(), new RandomAgent(), new RandomAgent());
+    game.playGame(1, System.out);
   }
 }
 
